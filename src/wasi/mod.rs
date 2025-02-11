@@ -387,6 +387,7 @@ pub const _SC_PAGE_SIZE: c_int = _SC_PAGESIZE;
 pub const _SC_IOV_MAX: c_int = 60;
 pub const _SC_NPROCESSORS_ONLN: core::ffi::c_int = 84;
 pub const _SC_SYMLOOP_MAX: c_int = 173;
+pub const _SC_HOST_NAME_MAX: core::ffi::c_int = 180;
 
 cfg_if! {
     if #[cfg(libc_ctest)] {
@@ -708,7 +709,7 @@ extern "C" {
     pub fn unlink(c: *const c_char) -> c_int;
     pub fn pread(fd: c_int, buf: *mut c_void, count: size_t, offset: off_t) -> ssize_t;
     pub fn pwrite(fd: c_int, buf: *const c_void, count: size_t, offset: off_t) -> ssize_t;
-
+    pub fn if_nametoindex(ifname: *const c_char) -> c_uint;
     pub fn lstat(path: *const c_char, buf: *mut stat) -> c_int;
 
     pub fn fsync(fd: c_int) -> c_int;

@@ -90,6 +90,7 @@ s! {
         pub ifa_name: *mut core::ffi::c_char,
         pub ifa_flags: core::ffi::c_int,
         pub ifa_addr: *mut crate::sockaddr,
+        pub ifa_dstaddr: *mut crate::sockaddr,
         pub ifa_netmask: *mut crate::sockaddr,
         pub ifu_broadaddr_or_dstaddr: *mut crate::sockaddr,
         pub ifa_data: *mut crate::c_uchar,
@@ -267,6 +268,15 @@ s! {
     }
 }
 
+s_no_extra_traits! {
+    pub struct sockaddr_nl {
+        pub nl_family: crate::sa_family_t,
+        nl_pad: crate::c_ushort,
+        pub nl_pid: u32,
+        pub nl_groups: u32,
+    }
+}
+
 pub const PTHREAD_STACK_MIN: crate::size_t = 2048;
 
 pub const __WASI_SDFLAGS_RD: core::ffi::c_int = 1;
@@ -378,6 +388,7 @@ pub const __WASI_SOCK_OPTION_LINGER: core::ffi::c_int = 13;
 pub const __WASI_SOCK_OPTION_OOB_INLINE: core::ffi::c_int = 14;
 pub const __WASI_SOCK_OPTION_RECV_BUF_SIZE: core::ffi::c_int = 15;
 pub const __WASI_SOCK_OPTION_SEND_BUF_SIZE: core::ffi::c_int = 16;
+pub const __WASI_SOCK_OPTION_SO_DOMAIN: core::ffi::c_int = 39;
 pub const __WASI_SOCK_OPTION_RECV_LOWAT: core::ffi::c_int = 17;
 pub const __WASI_SOCK_OPTION_SEND_LOWAT: core::ffi::c_int = 18;
 pub const __WASI_SOCK_OPTION_RECV_TIMEOUT: core::ffi::c_int = 19;
@@ -400,6 +411,7 @@ pub const SO_OOBINLINE: core::ffi::c_int = __WASI_SOCK_OPTION_OOB_INLINE;
 pub const SO_ONLYV6: core::ffi::c_int = __WASI_SOCK_OPTION_ONLY_V6;
 pub const SO_RCVBUF: core::ffi::c_int = __WASI_SOCK_OPTION_RECV_BUF_SIZE;
 pub const SO_RCVLOWAT: core::ffi::c_int = __WASI_SOCK_OPTION_RECV_LOWAT;
+pub const SO_DOMAIN: core::ffi::c_int = __WASI_SOCK_OPTION_SO_DOMAIN;
 pub const SO_RCVTIMEO: core::ffi::c_int = __WASI_SOCK_OPTION_RECV_TIMEOUT;
 pub const SO_REUSEPORT: core::ffi::c_int = __WASI_SOCK_OPTION_REUSE_PORT;
 pub const SO_REUSEADDR: core::ffi::c_int = __WASI_SOCK_OPTION_REUSE_ADDR;
@@ -419,6 +431,9 @@ pub const SO_BINDTODEVICE: core::ffi::c_int = __WASI_SOCK_OPTION_NOOP;
 pub const SO_INCOMING_CPU: core::ffi::c_int = __WASI_SOCK_OPTION_NOOP;
 pub const SO_ATTACH_FILTER: core::ffi::c_int = __WASI_SOCK_OPTION_NOOP;
 pub const SO_DETACH_FILTER: core::ffi::c_int = __WASI_SOCK_OPTION_NOOP;
+
+pub const NETLINK_ROUTE: core::ffi::c_int = 0;
+pub const AF_NETLINK: core::ffi::c_int = 16;
 
 pub const AF_UNSPEC: core::ffi::c_int = 0;
 pub const AF_INET: core::ffi::c_int = 1;
@@ -771,6 +786,7 @@ extern "C" {
     pub fn getifaddrs(ifap: *mut *mut crate::ifaddrs) -> core::ffi::c_int;
     pub fn getpeername(socket: core::ffi::c_int, addr: *mut sockaddr, addrlen: *mut socklen_t) -> core::ffi::c_int;
     pub fn getsockname(socket: core::ffi::c_int, addr: *mut sockaddr, addrlen: *mut socklen_t) -> core::ffi::c_int;
+    pub fn gethostname(name: *mut core::ffi::c_char, len: crate::size_t) -> core::ffi::c_int;
     pub fn getsockopt(
         sockfd: core::ffi::c_int,
         level: core::ffi::c_int,
