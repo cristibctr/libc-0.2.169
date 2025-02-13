@@ -58,6 +58,15 @@ s_no_extra_traits! {
     pub struct max_align_t {
         priv_: [f64; 4],
     }
+
+    pub struct utsname {
+        pub sysname: [c_char; 65],
+        pub nodename: [c_char; 65],
+        pub release: [c_char; 65],
+        pub version: [c_char; 65],
+        pub machine: [c_char; 65],
+        pub domainname: [c_char; 65],
+    }
 }
 
 #[allow(missing_copy_implementations)]
@@ -243,6 +252,7 @@ pub const O_EXEC: c_int = 0x02000000;
 pub const O_RDONLY: c_int = 0x04000000;
 pub const O_SEARCH: c_int = 0x08000000;
 pub const O_WRONLY: c_int = 0x10000000;
+pub const O_PATH: c_int = 0x1000000;
 pub const O_CLOEXEC: c_int = 0x0;
 pub const O_RDWR: c_int = O_WRONLY | O_RDONLY;
 pub const O_ACCMODE: c_int = O_EXEC | O_RDWR | O_SEARCH;
@@ -382,6 +392,7 @@ pub const ENOTCAPABLE: c_int = 76;
 pub const EOPNOTSUPP: c_int = ENOTSUP;
 pub const EWOULDBLOCK: c_int = EAGAIN;
 
+pub const _SC_CLK_TCK: c_int = 2;
 pub const _SC_PAGESIZE: c_int = 30;
 pub const _SC_PAGE_SIZE: c_int = _SC_PAGESIZE;
 pub const _SC_IOV_MAX: c_int = 60;
@@ -754,6 +765,7 @@ extern "C" {
     pub fn readv(fd: c_int, iov: *const crate::iovec, iovcnt: c_int) -> ssize_t;
     pub fn pwritev(fd: c_int, iov: *const crate::iovec, iovcnt: c_int, offset: off_t) -> ssize_t;
     pub fn preadv(fd: c_int, iov: *const crate::iovec, iovcnt: c_int, offset: off_t) -> ssize_t;
+    pub fn uname(buf: *mut crate::utsname) -> crate::c_int;
     pub fn posix_fadvise(fd: c_int, offset: off_t, len: off_t, advise: c_int) -> c_int;
     pub fn futimens(fd: c_int, times: *const crate::timespec) -> c_int;
     pub fn utimensat(
