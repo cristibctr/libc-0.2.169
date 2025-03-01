@@ -979,6 +979,12 @@ extern "C" {
         _external_handler: Option<unsafe extern "C" fn(core::ffi::c_int)>,
     ) -> core::ffi::c_int;
     fn __wasm_signal(signum: core::ffi::c_int);
+    pub fn chmod(path: *const core::ffi::c_char, mode: crate::mode_t) -> core::ffi::c_int;
+    pub fn fchmod(fd: core::ffi::c_int, mode: crate::mode_t) -> core::ffi::c_int;
+    pub fn umask(mask: crate::mode_t) -> crate::mode_t;
+    pub fn mkfifo(path: *const core::ffi::c_char, mode: crate::mode_t) -> core::ffi::c_int;
+    pub fn getuid() -> crate::uid_t;
+    pub fn pipe(fds: *mut core::ffi::c_int) -> core::ffi::c_int;
 }
 
 pub unsafe fn sigaction(sig: core::ffi::c_int, sa: *const sigaction, old: *mut sigaction) -> core::ffi::c_int {

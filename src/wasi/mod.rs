@@ -400,6 +400,7 @@ pub const _SC_IOV_MAX: c_int = 60;
 pub const _SC_NPROCESSORS_ONLN: core::ffi::c_int = 84;
 pub const _SC_SYMLOOP_MAX: c_int = 173;
 pub const _SC_HOST_NAME_MAX: core::ffi::c_int = 180;
+pub const SOMAXCONN: c_int = 128;
 
 cfg_if! {
     if #[cfg(libc_ctest)] {
