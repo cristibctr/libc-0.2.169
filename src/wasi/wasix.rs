@@ -773,6 +773,21 @@ extern "C" {
     pub fn dup(fd: core::ffi::c_int) -> core::ffi::c_int;
     pub fn dup2(src: core::ffi::c_int, dst: core::ffi::c_int) -> core::ffi::c_int;
 
+    // Terminal I/O functions
+    pub fn tcgetattr(fd: core::ffi::c_int, termios_p: *mut termios) -> core::ffi::c_int;
+    pub fn tcsetattr(fd: core::ffi::c_int, optional_actions: core::ffi::c_int, termios_p: *const termios) -> core::ffi::c_int;
+    pub fn tcsendbreak(fd: core::ffi::c_int, duration: core::ffi::c_int) -> core::ffi::c_int;
+    pub fn tcdrain(fd: core::ffi::c_int) -> core::ffi::c_int;
+    pub fn tcflush(fd: core::ffi::c_int, queue_selector: core::ffi::c_int) -> core::ffi::c_int;
+    pub fn tcflow(fd: core::ffi::c_int, action: core::ffi::c_int) -> core::ffi::c_int;
+    pub fn tcgetsid(fd: core::ffi::c_int) -> crate::pid_t;
+    pub fn cfmakeraw(termios_p: *mut termios);
+    pub fn cfgetispeed(termios_p: *const termios) -> speed_t;
+    pub fn cfgetospeed(termios_p: *const termios) -> speed_t;
+    pub fn cfsetispeed(termios_p: *mut termios, speed: speed_t) -> core::ffi::c_int;
+    pub fn cfsetospeed(termios_p: *mut termios, speed: speed_t) -> core::ffi::c_int;
+    pub fn cfsetspeed(termios_p: *mut termios, speed: speed_t) -> core::ffi::c_int;
+    
     pub fn accept(socket: core::ffi::c_int, addr: *mut sockaddr, addrlen: *mut socklen_t) -> core::ffi::c_int;
     pub fn accept4(
         socket: core::ffi::c_int,
@@ -991,6 +1006,19 @@ pub unsafe fn sigaction(sig: core::ffi::c_int, sa: *const sigaction, old: *mut s
     sigaction_external_default(sig, sa, old, Some(default_handler))
 }
 
+// Terminal I/O helper functions
+pub unsafe fn tcsetwinsize(fd: core::ffi::c_int, winsize: *const winsize) -> core::ffi::c_int {
+    // TIOCSWINSZ ioctl
+    let request: core::ffi::c_ulong = 0x5414;
+    crate::ioctl(fd, request as core::ffi::c_int, winsize as *mut core::ffi::c_void)
+}
+
+pub unsafe fn tcgetwinsize(fd: core::ffi::c_int, winsize: *mut winsize) -> core::ffi::c_int {
+    // TIOCGWINSZ ioctl
+    let request: core::ffi::c_ulong = 0x5413;
+    crate::ioctl(fd, request as core::ffi::c_int, winsize as *mut core::ffi::c_void)
+}
+
 extern "C" fn default_handler(sig: core::ffi::c_int) {
     if sig == SIGCHLD || sig == SIGURG || sig == SIGWINCH || sig == SIGCONT {
         return;
@@ -1055,4 +1083,181 @@ pub fn W_STOPCODE(sig: core::ffi::c_int) -> core::ffi::c_int {
 
 pub fn QCMD(cmd: core::ffi::c_int, type_: core::ffi::c_int) -> core::ffi::c_int {
     (cmd << 8) | (type_ & 0x00ff)
+}
+
+// Terminal I/O types
+pub type tcflag_t = core::ffi::c_uint;
+pub type cc_t = core::ffi::c_uchar;
+pub type speed_t = core::ffi::c_uint;
+
+// Terminal control characters
+pub const NCCS: core::ffi::c_int = 32;
+
+// Control character indices
+pub const VINTR: core::ffi::c_int = 0;
+pub const VQUIT: core::ffi::c_int = 1;
+pub const VERASE: core::ffi::c_int = 2;
+pub const VKILL: core::ffi::c_int = 3;
+pub const VEOF: core::ffi::c_int = 4;
+pub const VTIME: core::ffi::c_int = 5;
+pub const VMIN: core::ffi::c_int = 6;
+pub const VSWTC: core::ffi::c_int = 7;
+pub const VSTART: core::ffi::c_int = 8;
+pub const VSTOP: core::ffi::c_int = 9;
+pub const VSUSP: core::ffi::c_int = 10;
+pub const VEOL: core::ffi::c_int = 11;
+pub const VREPRINT: core::ffi::c_int = 12;
+pub const VDISCARD: core::ffi::c_int = 13;
+pub const VWERASE: core::ffi::c_int = 14;
+pub const VLNEXT: core::ffi::c_int = 15;
+pub const VEOL2: core::ffi::c_int = 16;
+
+// Input modes
+pub const IGNBRK: tcflag_t = 0x00000001;
+pub const BRKINT: tcflag_t = 0x00000002;
+pub const IGNPAR: tcflag_t = 0x00000004;
+pub const PARMRK: tcflag_t = 0x00000008;
+pub const INPCK: tcflag_t = 0x00000010;
+pub const ISTRIP: tcflag_t = 0x00000020;
+pub const INLCR: tcflag_t = 0x00000040;
+pub const IGNCR: tcflag_t = 0x00000080;
+pub const ICRNL: tcflag_t = 0x00000100;
+pub const IXON: tcflag_t = 0x00000200;
+pub const IXANY: tcflag_t = 0x00000400;
+pub const IXOFF: tcflag_t = 0x00000800;
+pub const IMAXBEL: tcflag_t = 0x00001000;
+pub const IUTF8: tcflag_t = 0x00002000;
+
+// Output modes
+pub const OPOST: tcflag_t = 0x00000001;
+pub const OLCUC: tcflag_t = 0x00000002;
+pub const ONLCR: tcflag_t = 0x00000004;
+pub const OCRNL: tcflag_t = 0x00000008;
+pub const ONOCR: tcflag_t = 0x00000010;
+pub const ONLRET: tcflag_t = 0x00000020;
+pub const OFILL: tcflag_t = 0x00000040;
+pub const OFDEL: tcflag_t = 0x00000080;
+pub const NLDLY: tcflag_t = 0x00000100;
+pub const NL0: tcflag_t = 0x00000000;
+pub const NL1: tcflag_t = 0x00000100;
+pub const CRDLY: tcflag_t = 0x00000600;
+pub const CR0: tcflag_t = 0x00000000;
+pub const CR1: tcflag_t = 0x00000200;
+pub const CR2: tcflag_t = 0x00000400;
+pub const CR3: tcflag_t = 0x00000600;
+pub const TABDLY: tcflag_t = 0x00001800;
+pub const TAB0: tcflag_t = 0x00000000;
+pub const TAB1: tcflag_t = 0x00000800;
+pub const TAB2: tcflag_t = 0x00001000;
+pub const TAB3: tcflag_t = 0x00001800;
+pub const XTABS: tcflag_t = 0x00001800;
+pub const BSDLY: tcflag_t = 0x00002000;
+pub const BS0: tcflag_t = 0x00000000;
+pub const BS1: tcflag_t = 0x00002000;
+pub const FFDLY: tcflag_t = 0x00004000;
+pub const FF0: tcflag_t = 0x00000000;
+pub const FF1: tcflag_t = 0x00004000;
+pub const VTDLY: tcflag_t = 0x00008000;
+pub const VT0: tcflag_t = 0x00000000;
+pub const VT1: tcflag_t = 0x00008000;
+
+// Control modes
+pub const CSIZE: tcflag_t = 0x00000030;
+pub const CS5: tcflag_t = 0x00000000;
+pub const CS6: tcflag_t = 0x00000010;
+pub const CS7: tcflag_t = 0x00000020;
+pub const CS8: tcflag_t = 0x00000030;
+pub const CSTOPB: tcflag_t = 0x00000040;
+pub const CREAD: tcflag_t = 0x00000080;
+pub const PARENB: tcflag_t = 0x00000100;
+pub const PARODD: tcflag_t = 0x00000200;
+pub const HUPCL: tcflag_t = 0x00000400;
+pub const CLOCAL: tcflag_t = 0x00000800;
+pub const CRTSCTS: tcflag_t = 0x80000000;
+pub const CMSPAR: tcflag_t = 0x40000000;
+
+// Local modes
+pub const ECHOCTL: tcflag_t = 0x00000040;
+pub const ECHOPRT: tcflag_t = 0x00000080;
+pub const ECHOKE: tcflag_t = 0x00000100;
+pub const FLUSHO: tcflag_t = 0x00000200;
+pub const PENDIN: tcflag_t = 0x00000400;
+pub const EXTPROC: tcflag_t = 0x00000800;
+pub const ISIG: tcflag_t = 0x00000001;
+pub const ICANON: tcflag_t = 0x00000002;
+pub const ECHO: tcflag_t = 0x00000008;
+pub const ECHOE: tcflag_t = 0x00000010;
+pub const ECHOK: tcflag_t = 0x00000020;
+pub const ECHONL: tcflag_t = 0x00000004;
+pub const NOFLSH: tcflag_t = 0x00001000;
+pub const TOSTOP: tcflag_t = 0x00002000;
+pub const IEXTEN: tcflag_t = 0x00004000;
+
+// Baud rates
+pub const B0: speed_t = 0;
+pub const B50: speed_t = 1;
+pub const B75: speed_t = 2;
+pub const B110: speed_t = 3;
+pub const B134: speed_t = 4;
+pub const B150: speed_t = 5;
+pub const B200: speed_t = 6;
+pub const B300: speed_t = 7;
+pub const B600: speed_t = 8;
+pub const B1200: speed_t = 9;
+pub const B1800: speed_t = 10;
+pub const B2400: speed_t = 11;
+pub const B4800: speed_t = 12;
+pub const B9600: speed_t = 13;
+pub const B19200: speed_t = 14;
+pub const B38400: speed_t = 15;
+pub const B57600: speed_t = 4097;
+pub const B115200: speed_t = 4098;
+pub const B230400: speed_t = 4099;
+pub const B460800: speed_t = 4100;
+pub const B500000: speed_t = 4101;
+pub const B576000: speed_t = 4102;
+pub const B921600: speed_t = 4103;
+pub const B1000000: speed_t = 4104;
+pub const B1152000: speed_t = 4105;
+pub const B1500000: speed_t = 4106;
+pub const B2000000: speed_t = 4107;
+pub const B2500000: speed_t = 4108;
+pub const B3000000: speed_t = 4109;
+pub const B3500000: speed_t = 4110;
+pub const B4000000: speed_t = 4111;
+
+// tcsetattr actions
+pub const TCSANOW: core::ffi::c_int = 0;
+pub const TCSADRAIN: core::ffi::c_int = 1;
+pub const TCSAFLUSH: core::ffi::c_int = 2;
+
+// tcflush selectors
+pub const TCIFLUSH: core::ffi::c_int = 0;
+pub const TCOFLUSH: core::ffi::c_int = 1;
+pub const TCIOFLUSH: core::ffi::c_int = 2;
+
+// tcflow actions
+pub const TCOOFF: core::ffi::c_int = 0;
+pub const TCOON: core::ffi::c_int = 1;
+pub const TCIOFF: core::ffi::c_int = 2;
+pub const TCION: core::ffi::c_int = 3;
+
+s! {
+    pub struct termios {
+        pub c_iflag: tcflag_t,
+        pub c_oflag: tcflag_t,
+        pub c_cflag: tcflag_t,
+        pub c_lflag: tcflag_t,
+        pub c_line: cc_t,
+        pub c_cc: [cc_t; NCCS as usize],
+        pub c_ispeed: speed_t,
+        pub c_ospeed: speed_t,
+    }
+
+    pub struct winsize {
+        pub ws_row: core::ffi::c_ushort,
+        pub ws_col: core::ffi::c_ushort,
+        pub ws_xpixel: core::ffi::c_ushort,
+        pub ws_ypixel: core::ffi::c_ushort,
+    }
 }
