@@ -1006,17 +1006,32 @@ pub unsafe fn sigaction(sig: core::ffi::c_int, sa: *const sigaction, old: *mut s
     sigaction_external_default(sig, sa, old, Some(default_handler))
 }
 
+// Terminal I/O constants
+pub const TIOCGWINSZ: core::ffi::c_int = 0x5413;
+pub const TIOCSWINSZ: core::ffi::c_int = 0x5414;
+pub const TIOCSPGRP: core::ffi::c_int = 0x5410;
+pub const TIOCGPGRP: core::ffi::c_int = 0x540F;
+
 // Terminal I/O helper functions
 pub unsafe fn tcsetwinsize(fd: core::ffi::c_int, winsize: *const winsize) -> core::ffi::c_int {
-    // TIOCSWINSZ ioctl
-    let request: core::ffi::c_ulong = 0x5414;
-    crate::ioctl(fd, request as core::ffi::c_int, winsize as *mut core::ffi::c_void)
+    crate::ioctl(fd, TIOCSWINSZ, winsize as *mut core::ffi::c_void)
 }
 
 pub unsafe fn tcgetwinsize(fd: core::ffi::c_int, winsize: *mut winsize) -> core::ffi::c_int {
-    // TIOCGWINSZ ioctl
-    let request: core::ffi::c_ulong = 0x5413;
-    crate::ioctl(fd, request as core::ffi::c_int, winsize as *mut core::ffi::c_void)
+    crate::ioctl(fd, TIOCGWINSZ, winsize as *mut core::ffi::c_void)
+}
+
+pub unsafe fn tcsetpgrp(fd: core::ffi::c_int, pgrp: crate::pid_t) -> core::ffi::c_int {
+    crate::ioctl(fd, TIOCSPGRP, &pgrp as *const _ as *mut core::ffi::c_void)
+}
+
+pub unsafe fn tcgetpgrp(fd: core::ffi::c_int) -> crate::pid_t {
+    let mut pgrp: crate::pid_t = 0;
+    let ret = crate::ioctl(fd, TIOCGPGRP, &mut pgrp as *mut _ as *mut core::ffi::c_void);
+    if ret < 0 {
+        return -1;
+    }
+    pgrp
 }
 
 extern "C" fn default_handler(sig: core::ffi::c_int) {
