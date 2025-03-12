@@ -1277,4 +1277,10 @@ s! {
         pub ws_xpixel: core::ffi::c_ushort,
         pub ws_ypixel: core::ffi::c_ushort,
     }
+
+    pub struct ucred {
+        pub pid: crate::pid_t,
+        pub uid: crate::uid_t,
+        pub gid: crate::gid_t,
+    }
 }
