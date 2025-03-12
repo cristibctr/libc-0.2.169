@@ -399,6 +399,7 @@ pub const __WASI_SOCK_OPTION_TTL: core::ffi::c_int = 23;
 pub const __WASI_SOCK_OPTION_MULTICAST_TTL_V4: core::ffi::c_int = 24;
 pub const __WASI_SOCK_OPTION_TYPE: core::ffi::c_int = 25;
 pub const __WASI_SOCK_OPTION_PROTO: core::ffi::c_int = 26;
+pub const __WASI_SOCK_OPTION_SO_PEERCRED: core::ffi::c_int = 27;
 
 pub const SO_ACCEPTCONN: core::ffi::c_int = __WASI_SOCK_OPTION_LISTENING;
 pub const SO_BROADCAST: core::ffi::c_int = __WASI_SOCK_OPTION_BROADCAST;
@@ -431,6 +432,7 @@ pub const SO_BINDTODEVICE: core::ffi::c_int = __WASI_SOCK_OPTION_NOOP;
 pub const SO_INCOMING_CPU: core::ffi::c_int = __WASI_SOCK_OPTION_NOOP;
 pub const SO_ATTACH_FILTER: core::ffi::c_int = __WASI_SOCK_OPTION_NOOP;
 pub const SO_DETACH_FILTER: core::ffi::c_int = __WASI_SOCK_OPTION_NOOP;
+pub const SO_PEERCRED: core::ffi::c_int = __WASI_SOCK_OPTION_SO_PEERCRED;
 
 pub const NETLINK_ROUTE: core::ffi::c_int = 0;
 pub const AF_NETLINK: core::ffi::c_int = 16;
